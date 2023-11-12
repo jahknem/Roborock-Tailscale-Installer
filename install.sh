@@ -75,7 +75,8 @@ echo "Extraction complete."
 
 # Step 6: Copy the Tailscale binaries to /usr/local/bin.
 echo "Copying binaries to /usr/local/bin..."
-cp "/mnt/data/${tailscale_dir}/tailscale" "/mnt/data/${tailscale_dir}/tailscaled" /usr/local/bin/check_failure "Failed to copy Tailscale binaries."
+cp "/mnt/data/${tailscale_dir}/tailscale" "/mnt/data/${tailscale_dir}/tailscaled" /usr/local/bin/
+check_failure "Failed to copy Tailscale binaries."
 echo "Binaries copied."
 
 # Step 7: Ensure the persistent state directory exists.
