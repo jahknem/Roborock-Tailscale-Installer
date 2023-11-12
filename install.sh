@@ -46,17 +46,17 @@ tailscale_version="1.52.1"
 download_url="https://pkgs.tailscale.com/stable/tailscale_${tailscale_version}_${tailscale_arch}.tgz"
 echo "Download URL set: $download_url"
 
-# Step 4: Download the Tailscale package to /tmp directory.
+# Step 4: Download the Tailscale package to /mnt/data directory.
 echo "Downloading Tailscale package..."
-wget -O /tmp/tailscale.tgz "$download_url" --no-check-certificate && echo "Download complete."
+wget -O /mnt/data/tailscale.tgz "$download_url" --no-check-certificate && echo "Download complete."
 
 # Step 5: Extract the downloaded package.
 echo "Extracting package..."
-tar -C /tmp -xzf /tmp/tailscale.tgz && echo "Extraction complete."
+tar -C /mnt/data -xzf /mnt/data/tailscale.tgz && echo "Extraction complete."
 
 # Step 6: Copy the Tailscale binaries to /usr/local/bin.
 echo "Copying binaries to /usr/local/bin..."
-cp /tmp/tailscale/tailscale /tmp/tailscale/tailscaled /usr/local/bin/ && echo "Binaries copied."
+cp /mnt/data/tailscale/tailscale /mnt/data/tailscale/tailscaled /usr/local/bin/ && echo "Binaries copied."
 
 # Step 7: Ensure the persistent state directory exists.
 echo "Checking for persistent state directory..."
