@@ -1,6 +1,13 @@
 #!/bin/ash
 # Starting the Tailscale installation script.
 
+check_failure() {
+    if [ $? -ne 0 ]; then
+        echo "Error: $1"
+        exit 1
+    fi
+}
+
 # Step 1: Determine the CPU architecture of the current system.
 cpu_type=$(uname -m)
 echo "Detected CPU architecture: $cpu_type"
@@ -48,21 +55,28 @@ echo "Download URL set: $download_url"
 
 # Step 4: Download the Tailscale package to /mnt/data directory.
 echo "Downloading Tailscale package..."
-wget -O /mnt/data/tailscale.tgz "$download_url" --no-check-certificate && echo "Download complete."
+wget -O /mnt/data/tailscale.tgz "$download_url" --no-check-certificate
+check_failure "Failed to download Tailscale package."
+echo "Download complete."
 
 # Step 5: Extract the downloaded package.
 echo "Extracting package..."
-tar -C /mnt/data -xzf /mnt/data/tailscale.tgz && echo "Extraction complete."
+tar -C /mnt/data -xzf /mnt/data/tailscale.tgz
+check_failure "Failed to extract Tailscale package."
+echo "Extraction complete."
 
 # Step 6: Copy the Tailscale binaries to /usr/local/bin.
 echo "Copying binaries to /usr/local/bin..."
-cp /mnt/data/tailscale/tailscale /mnt/data/tailscale/tailscaled /usr/local/bin/ && echo "Binaries copied."
+cp /mnt/data/tailscale/tailscale /mnt/data/tailscale/tailscaled /usr/local/bin/ 
+check_failure "Failed to copy Tailscale binaries."
+echo "Binaries copied."
 
 # Step 7: Ensure the persistent state directory exists.
 echo "Checking for persistent state directory..."
 if [ ! -d /mnt/data/tailscale ]; then
     echo "Directory doesn't exist. Creating directory..."
     mkdir -p /mnt/data/tailscale
+    check_failure "Failed to create persistent state directory."
     echo "Directory created."
 else
     echo "Directory already exists. Skipping creation."
@@ -73,8 +87,10 @@ echo "Configuring Tailscaled to start on boot..."
 if ! grep -Fq "start-stop-daemon -S -b -x /usr/local/bin/tailscaled -- --state=/mnt/data/tailscale/tailscaled.state" /etc/rc.local; then
     echo "Backing up rc.local before modifications..."
     cp /etc/rc.local /etc/rc.local.backup && echo "Backup created: rc.local.backup"
+    check_failure "Failed to back up rc.local."
     echo "Adding Tailscaled to rc.local..."
     sed -i '/^exit 0$/i start-stop-daemon -S -b -x /usr/local/bin/tailscaled -- --state=/mnt/data/tailscale/tailscaled.state' /etc/rc.local
+    check_failure "Failed to add Tailscaled to rc.local."
     echo "Tailscaled added to rc.local."
 else
     echo "Tailscaled is already configured to start on boot."
@@ -84,5 +100,5 @@ fi
 echo "Starting Tailscale daemon..."
 start-stop-daemon -S -b -x /usr/local/bin/tailscaled -- --state=/mnt/data/tailscale/tailscaled.state
 echo "Tailscale daemon started."
-
+check_failure "Failed to start Tailscale daemon."
 echo "Tailscale installation script has completed."
