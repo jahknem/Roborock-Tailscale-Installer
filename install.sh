@@ -50,10 +50,18 @@ echo "Translated architecture for Tailscale: $tailscale_arch"
 
 # Step 3: Define the Tailscale version to download and construct the URL.
 tailscale_version="1.52.1"
+tailscale_dir="tailscale_${tailscale_version}_${tailscale_arch}"
 download_url="https://pkgs.tailscale.com/stable/tailscale_${tailscale_version}_${tailscale_arch}.tgz"
 echo "Download URL set: $download_url"
 
-# Step 4: Download the Tailscale package to /mnt/data directory.
+# Step 4: Check if Tailscale package is already downloaded, delete if exists.
+if [ -f "/mnt/data/${tailscale_dir}.tgz" ]; then
+    echo "Old Tailscale package found. Deleting..."
+    rm -f "/mnt/data/${tailscale_dir}.tgz"
+    check_failure "Failed to delete old Tailscale package."
+    echo "Old package deleted."
+fi
+
 echo "Downloading Tailscale package..."
 wget -O /mnt/data/tailscale.tgz "$download_url" --no-check-certificate
 check_failure "Failed to download Tailscale package."
@@ -67,8 +75,7 @@ echo "Extraction complete."
 
 # Step 6: Copy the Tailscale binaries to /usr/local/bin.
 echo "Copying binaries to /usr/local/bin..."
-cp /mnt/data/tailscale/tailscale /mnt/data/tailscale/tailscaled /usr/local/bin/ 
-check_failure "Failed to copy Tailscale binaries."
+cp "/mnt/data/${tailscale_dir}/tailscale" "/mnt/data/${tailscale_dir}/tailscaled" /usr/local/bin/check_failure "Failed to copy Tailscale binaries."
 echo "Binaries copied."
 
 # Step 7: Ensure the persistent state directory exists.
